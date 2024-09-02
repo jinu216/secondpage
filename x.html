@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Details Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container label, .container input, .container select, .container button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .container input, .container select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .container button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .container button:hover {
+            background-color: #218838;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 100px;
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.1;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .watermark img {
+            max-width: 300px;
+            width: 100%;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://maplejet.com/wp-content/uploads/2020/07/mj-video-thumb.jpg" alt="Logo">
+        </div>
+        <div class="watermark">
+            <img src="https://maplejet.com/wp-content/uploads/2020/07/mj-video-thumb.jpg" alt="Watermark">
+        </div>
+        <h1>Enter Your Details</h1>
+        <form id="detailsForm" action="https://formspree.io/f/xzzpwpjj" method="POST">
+            <label for="name">Company Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="mobileNumber">Contact Details:</label>
+            <input type="text" id="mobileNumber" name="mobileNumber" required>
+
+            <label for="address">UID/Serial No:</label>
+            <input type="text" id="address" name="address" required>
+
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+
+            <label for="dropdown1">Machine Model:</label>
+            <select id="dropdown1" name="dropdown1">
+                <option value="Hx Nitro">Hx Nitro</option>
+                <option value="Hx Ultro">Hx Ultro(160 ml)</option>
+                <option value="Hx Cartro/Megallo">Hx Cartro/Megallo</option>
+                <option value="AIS">AIS(250 ml)</option>
+                <option value="PD Series">PD Series</option>
+            </select>
+
+            <label for="dropdown2">Cartridge Type:</label>
+            <select id="dropdown2" name="dropdown2">
+                <option value="eurex">eurex</option>
+                <option value="Chronplast w">Chronplast w</option>
+                <option value="Chronplat S">Chronplat S</option>
+                <option value="Poerion">Poerion</option>
+                <option value="Soverien Black">Soverien Black</option>
+                <option value="Rapid Plus">Rapid Plus</option>
+                <option value="Dynaplast">Dynaplast</option>
+            </select>
+
+            <label for="dropdown3">Delivery type:</label>
+            <select id="dropdown3" name="dropdown3">
+                <option value="Delivery">Delivery</option>
+                <option value="Collection">Collection</option>
+            </select>
+
+            <label for="dropdown4">Payment option:</label>
+            <select id="dropdown4" name="dropdown4" onchange="toggleImageUpload()">
+                <option value="Online">Online</option>
+                <option value="Cash on Delivery">Cash on Delivery</option>
+            </select>
+
+            <div id="imageUploadSection" class="hidden">
+                <label for="image">Upload Image (Supporting Document):</label>
+                <input type="file" id="image" name="image" accept="image/*">
+            </div>
+
+            <label for="consentPerson">Consent Person Name:</label>
+            <input type="text" id="consentPerson" name="consentPerson" required>
+
+            <button type="button" onclick="generatePDF()">Generate PDF</button>
+            <button type="submit">Submit & Send PDF</button>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.16.0"></script>
+    <script>
+        function toggleImageUpload() {
+            const paymentOption = document.getElementById('dropdown4').value;
+            const imageUploadSection = document.getElementById('imageUploadSection');
+            
+            if (paymentOption === 'Online') {
+                imageUploadSection.classList.remove('hidden');
+            } else {
+                imageUploadSection.classList.add('hidden');
+            }
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header
+            const companyName = document.getElementById('name').value;
+            const currentDate = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
+            doc.setFontSize(18);
+            doc.setFont("bold");
+            doc.text(companyName, 10, 10);
+            doc.text("Purchase Order", 90, 10);
+            doc.text(currentDate, 160, 10);
+
+            // Form Data
+            doc.setFontSize(12);
+            doc.setFont("normal");
+            doc.text("Contact Details: " + document.getElementById('mobileNumber').value, 10, 30);
+            doc.text("UID/Serial No: " + document.getElementById('address').value, 10, 40);
+            doc.text("Quantity: " + document.getElementById('quantity').value, 10, 50);
+            doc.text("Machine Model: " + document.getElementById('dropdown1').value, 10, 60);
+            doc.text("Cartridge Type: " + document.getElementById('dropdown2').value, 10, 70);
+            doc.text("Delivery Type: " + document.getElementById('dropdown3').value, 10, 80);
+            doc.text("Payment Option: " + document.getElementById('dropdown4').value, 10, 90);
+            doc.text("Consent Person: " + document.getElementById('consentPerson').value, 10, 100);
+
+            // Add image to PDF if the option is visible
+            const imageUploadSection = document.getElementById('imageUploadSection');
+            if (!imageUploadSection.classList.contains('hidden')) {
+                const imageInput = document.getElementById('image').files[0];
+                if (imageInput) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imgData = event.target.result;
+                        doc.addImage(imgData, 'JPEG', 10, 110, 50, 50);
+                        doc.save("purchase_order.pdf");
+                    };
+                    reader.readAsDataURL(imageInput);
+                } else {
+                    doc.save("purchase_order.pdf");
+                }
+            } else {
+                doc.save("purchase_order.pdf");
+            }
+        }
+    </script>
+</body>
+</html>
+
